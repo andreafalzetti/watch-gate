@@ -29,6 +29,18 @@ For the queues I have used [AWS SQS](https://aws.amazon.com/sqs/) as it was quic
 
 The Catalog service has been included in the same code base as per the Watch Gate for time purposes. Ideally it would be an independend microservice.
 
+## Documentation
+
+https://documenter.getpostman.com/view/75820/watch-gate/6tXb6Ai
+
+![docs-sample-postman](https://user-images.githubusercontent.com/2318450/29997248-63963506-9006-11e7-9eb0-8b1f388a97a9.jpg)
+
+
+
+## Demo 
+
+
+
 ## Getting Started
 
 Getting up and running is as easy as 1, 2, 3.
