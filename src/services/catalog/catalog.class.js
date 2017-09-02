@@ -5,7 +5,15 @@ class Service {
   }
 
   find (params) {
-    return Promise.resolve([]);
+    console.log('params ==>', params)
+    const { availableVideos } = params;
+    let result = {
+      message: 'OK',
+      data: {
+        availableVideos
+      }
+    };
+    return Promise.resolve(result);
   }
 
   get (id, params) {
@@ -15,9 +23,14 @@ class Service {
   }
 
   create (data, params) {
-    if (Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current)));
-    }
+    // if (Array.isArray(data)) {
+    //   return Promise.all(data.map(current => this.create(current)));
+    // }
+
+    console.log('watch request', data, params)
+    // params.producer.send(req.profiler.sqsProducer, function(err) {
+    //   if (err) console.log(err);
+    // });
 
     return Promise.resolve(data);
   }
