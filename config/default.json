@@ -1,0 +1,10 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "mongodb": "mongodb://andrea:kettle-organza-quarrel@ds121494.mlab.com:21494/watch-gate"
+}
