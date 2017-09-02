@@ -25,6 +25,10 @@ This project uses [Feathers](http://feathersjs.com). A Node.js open source web f
 
 For the queues I have used [AWS SQS](https://aws.amazon.com/sqs/) as it was quick to setup and I have experienced with it.
 
+## Notes
+
+The Catalog service has been included in the same code base as per the Watch Gate for time purposes. Ideally it would be an independend microservice.
+
 ## Getting Started
 
 Getting up and running is as easy as 1, 2, 3.
