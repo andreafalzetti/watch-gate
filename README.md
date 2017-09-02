@@ -1,10 +1,31 @@
 # watch-gate
 
+## About
+
 > Node.js microservice for handling the check of how many concurrent streams a given user is watching at the same time
 
-## About
+## Introduction
 
-This project uses [Feathers](http://feathersjs.com). An open source web framework for building modern real-time applications.
+This project has been designed and developed using a scalable microservices approach. As the diagram below shows, there are a number of microservices that work together in order to provide the full service to the end user, in particular an on-demand streaming service.
+
+## Flow
+
+The users will interact with the platform via the **Client** which is an installable app for mobile phones, tablet, smart TVs, etc. The _Client_ will interact with the **Catalog** microservice API in order to provide the available content to the end user. This microservice (Catalog), has access to the up to date, cached list of the available video content on the platform.
+
+When the users decide what video content they want to watch and click on the Play button, the Client will send a **watch_request** to the Catalog microservice containing the auth-token of the user requesting the resource and the ID of the video that the user wants to watch.
+
+The _Catalog_ microservice will handle the request and add it into a standard queue called _watch_requests_. This list is used to keep track of all incoming requests from the clients. Using the queue will prevent a peak time to slow down the platform and it will guarantee that all requests are processed.
+
+
+## Logging
+
+## Scalability
+
+## Technology Used
+
+This project uses [Feathers](http://feathersjs.com). A Node.js open source web framework for building modern real-time applications. It's built on top of [Express.js](https://expressjs.com/), a fast and unopinionated web framework for Node.js.
+
+For the queues I have used [AWS SQS](https://aws.amazon.com/sqs/) as it was quick to setup and I have experienced with it.
 
 ## Getting Started
 
