@@ -5,7 +5,8 @@
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const videos = new mongooseClient.Schema({
-    text: { type: String, required: true },
+    title: { type: String, required: true },
+    category: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   });
