@@ -1,12 +1,29 @@
 const API_URL = 'http://localhost:3030';
 let availableVideos;
 
+const clearAlert = (user) => {
+  $(`#alert_${user}`).empty() 
+}
+
+const showAlert = (user) => {
+  const alertEl = `
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <strong>Alert!</strong> You are watching 3 concurrent streams. Stop one if you wish to watch something else.
+    </div>`
+
+  $(`#alert_${user}`).html(alertEl)
+}
+
 const refreshUser = async (user) => {
   (async () => {
     try {  
       let users = await fetch(`${API_URL}/users/${user}`);
       
       let parsedUsers = await users.json();
+      clearAlert(parsedUsers._id)
       updateUserStreams(parsedUsers)
     } catch (error) {
       console.log(error);
@@ -14,14 +31,18 @@ const refreshUser = async (user) => {
   })();
 };
 
-const stopStream = (stream) => {
+const stopStream = (user, stream) => {
+  console.log('stopStream', user, stream);
   fetch(`${API_URL}/streams/${stream}`, {
     method: 'delete',
     headers: {
       'Content-Type': 'application/json'
     }
   }).then(res => res.json())
-    .then(res => console.log(res));
+    .then(res => {
+      console.log(res)
+      refreshUser(user)
+    });
 };
 
 const requestToWatch = (user) => {
@@ -57,19 +78,21 @@ const updateUserStreams = (user) => {
   console.log('updateUser', typeof user, user)
   $(`#${user._id} .watching`).slideUp('slow', () => {
     let { streams = [] } = user;
-    if (typeof streams._id !== 'undefined') {
+    if (streams === null ) {
+      streams = [];
+    }
+    if (typeof streams !== 'undefined' && typeof streams._id !== 'undefined') {
       streams = [streams]
     }
-    console.log('streams =>', streams)
     let userStramsEl = '<span class="pl-4 pb-5">Nothing</span>';
     if (streams && streams.length > 0) {
       userStramsEl = streams.reduce((accumulator, stream) => {
-        accumulator += `<li class="list-group-item">${stream.videos.title} <button onClick="stopStream('${stream._id}')" class="btn btn-link btn-sm">Stop</button></li>`;
+        accumulator += `<li class="list-group-item">${stream.videos.title} <button onClick="stopStream('${user._id}', '${stream._id}')" class="btn btn-link btn-sm">Stop</button></li>`;
         return accumulator;
-      }, '');
-      $(`#${user._id} .watching`).html(userStramsEl).slideDown(400);
-
+      }, '');      
     }
+    $(`#active_streams_${user._id}`).text(streams.length);
+    $(`#${user._id} .watching`).html(userStramsEl).slideDown(400);
   });
 };
 
@@ -78,14 +101,16 @@ const renderUsers = (users) => {
   users.map((user, index) => {
     
     let { streams = [] } = user;
-    if (typeof streams._id !== 'undefined') {
+    if (streams === null ) {
+      streams = [];
+    }
+    if (typeof streams !== 'undefined' && typeof streams._id !== 'undefined') {
       streams = [streams]
     }
-    console.log('streams =>', streams)
     let userStramsEl = '<span class="pl-4 pb-5">Nothing</span>';
     if (streams && streams.length > 0) {
       userStramsEl = streams.reduce((accumulator, stream) => {
-        accumulator += `<li class="list-group-item">${stream.videos.title} <button onClick="stopStream('${stream._id}')" class="btn btn-link btn-sm">Stop</button></li>`;
+        accumulator += `<li class="list-group-item">${stream.videos.title} <button onClick="stopStream('${user._id}', '${stream._id}')" class="btn btn-link btn-sm">Stop</button></li>`;
         return accumulator;
       }, '');
     }
@@ -95,14 +120,7 @@ const renderUsers = (users) => {
       <div class="col-md-4" id="${user._id}">
       <div class="card" style="width: 20rem;">
         <img class="card-img-top" src="http://via.placeholder.com/350x150&text=${user.firstName}" alt="Card image cap">
-        <div class="card-block">
-          <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-            <strong>Alert!</strong> You are watching 3 concurrent streams. Stop one if you wish to watch something else.
-          </div>
-        </div>
+        <div class="card-block" id="alert_${user._id}"></div>
         <div class="card-block">
           <h4 class="card-title pl-4 pt-4">Watching <button class="btn btn-link btn-sm" onClick="refreshUser('${user._id}')"><i class="fa fa-refresh" aria-hidden="true"></i></button></h4>                    
         </div>
@@ -113,7 +131,7 @@ const renderUsers = (users) => {
         </div>
         <div class="card-block p-4">
           <div><small>ID: ${user._id}</small></div>
-          <div><small>Active streams: ${streams.length}</small></div>
+          <div><small>Active streams: <span id="active_streams_${user._id}">${streams.length}</span></small></div>
         </div>
       </div>
     </div>`;
@@ -137,7 +155,7 @@ $( document ).ready(() => {
 
       renderUsers(parsedUsers.data)
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   })();
 
@@ -149,9 +167,13 @@ $( document ).ready(() => {
 
   socket.on('approved', (msg) => {
     console.log('approved_watch_request', msg);
+    const { user } = msg;
+    refreshUser(user);
   });
   socket.on('rejected', (msg) => {
     console.log('rejected_watch_request', msg);
+    const { user } = msg;
+    showAlert(user); 
   });
   
   $(".alert").alert()  
