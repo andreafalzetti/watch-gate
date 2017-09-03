@@ -1,3 +1,6 @@
+const errors = require('feathers-errors');
+const uuidv4 = require('uuid/v4');
+
 /* eslint-disable no-unused-vars */
 class Service {
   constructor (options) {
@@ -5,7 +8,6 @@ class Service {
   }
 
   find (params) {
-    console.log('params ==>', params)
     const { availableVideos } = params;
     let result = {
       message: 'OK',
@@ -23,16 +25,24 @@ class Service {
   }
 
   create (data, params) {
-    // if (Array.isArray(data)) {
-    //   return Promise.all(data.map(current => this.create(current)));
-    // }
-
-    console.log('watch request', data, params)
-    // params.producer.send(req.profiler.sqsProducer, function(err) {
-    //   if (err) console.log(err);
-    // });
-
-    return Promise.resolve(data);
+    let result = {
+      message: 'OK',
+      data
+    };
+    const watchRequest = {
+      id: uuidv4(),
+      body: JSON.stringify(data)
+    };
+    return new Promise ((resolve, reject) => {
+      params.producer.send(watchRequest, error => {
+        if (error) {
+          const err = new errors.GeneralError('watch_request was not added to the queue', { error: error.message });
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
   }
 
   update (id, data, params) {
