@@ -9,7 +9,7 @@ const feathers = require('feathers');
 const configuration = require('feathers-configuration');
 const hooks = require('feathers-hooks');
 const rest = require('feathers-rest');
-
+const socketio = require('feathers-socketio');
 
 const middleware = require('./middleware');
 const services = require('./services');
@@ -35,7 +35,7 @@ app.use('/', feathers.static(app.get('public')));
 app.configure(hooks());
 app.configure(mongodb);
 app.configure(rest());
-
+app.configure(socketio());
 
 // Set up our services (see `services/index.js`)
 app.configure(services);
