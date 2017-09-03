@@ -3,6 +3,17 @@ const API_URL = 'http://localhost:3030';
 const renderUsers = (users) => {
   console.log('renderUsers', typeof users, users)
   users.map((user, index) => {
+    
+    const { streams = [] } = user;
+    console.log('streams =>', streams)
+    let userStramsEl = '<span class="pl-4 pb-5">Nothing</span>';
+    if (streams && streams.length > 0) {
+      userStramsEl = streams.reduce((accumulator, stream) => {
+        accumulator += `<li class="list-group-item">${stream.videos.title}</li>`;
+        return accumulator;
+      }, '');
+    }
+    console.log(user._id, streams)
     const userEl = `
       <div class="col-md-4">
       <div class="card" style="width: 20rem;">
@@ -10,12 +21,8 @@ const renderUsers = (users) => {
         <div class="card-block">
           <h4 class="card-title pl-4 pt-4">Watching</h4>
         </div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">Cras justo odio</li>
-          <li class="list-group-item">Dapibus ac facilisis in</li>
-          <li class="list-group-item">Vestibulum at eros</li>
-        </ul>
-        <div class="card-block">
+        <ul class="list-group list-group-flush">${userStramsEl}</ul>
+        <div class="card-block p-4">
           <a href="#" class="card-link">Card link</a>
           <a href="#" class="card-link">Another link</a>
         </div>
