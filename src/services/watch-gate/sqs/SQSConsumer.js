@@ -134,12 +134,13 @@ class SQSConsumer {
   async handleMessage (message, done) {    
     const payload = JSON.parse(message.Body);    
     const userStreamsCount = await this.countStremsByUserId(payload.user);
+    const body = JSON.parse(message.Body);
     if(userStreamsCount < 3) {
-      await this.approveWatchRequest(message.Body);
+      await this.approveWatchRequest(body);
       await this.saveStream(payload);
       done();
     } else {
-      await this.rejectWatchRequest(JSON.parse(message.Body));
+      await this.rejectWatchRequest(body);
       done();
     }
   }
