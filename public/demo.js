@@ -42,7 +42,7 @@ const renderUsers = (users) => {
     let userStramsEl = '<span class="pl-4 pb-5">Nothing</span>';
     if (streams && streams.length > 0) {
       userStramsEl = streams.reduce((accumulator, stream) => {
-        accumulator += `<li class="list-group-item">${stream.videos.title}</li>`;
+        accumulator += `<li class="list-group-item">${stream.videos.title} <button class="btn btn-secondary btn-sm">Stop</button></li>`;
         return accumulator;
       }, '');
     }
@@ -52,6 +52,14 @@ const renderUsers = (users) => {
       <div class="col-md-4">
       <div class="card" style="width: 20rem;">
         <img class="card-img-top" src="http://via.placeholder.com/350x150&text=${user.firstName}" alt="Card image cap">
+        <div class="card-block">
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>Alert!</strong> You are watching 3 concurrent streams. Stop one if you wish to watch something else.
+          </div>
+        </div>
         <div class="card-block">
           <h4 class="card-title pl-4 pt-4">Watching</h4>
         </div>
@@ -103,4 +111,5 @@ $( document ).ready(() => {
     console.log('rejected_watch_request', msg);
   });
   
+  $(".alert").alert()  
 });
