@@ -2,6 +2,7 @@
 const createService = require('./watch-gate.class.js');
 const hooks = require('./watch-gate.hooks');
 const filters = require('./watch-gate.filters');
+const SQSConsumer = require('./sqs');
 
 module.exports = function () {
   const app = this;
@@ -23,4 +24,17 @@ module.exports = function () {
   if (service.filter) {
     service.filter(filters);
   }
+
+  const sqsService = SQSConsumer.createSQSConsumer({
+    awsConfig: {
+      region: app.get('aws_region'),
+      accessKeyId: app.get('aws_access_key_id'),
+      secretAccessKey: app.get('aws_secret_access_key'),
+    },
+    queueUrl: app.get('sqs_queues').watch_request,
+    messageAttributeNames: [],
+    app
+  });
+  sqsService.start();
+
 };

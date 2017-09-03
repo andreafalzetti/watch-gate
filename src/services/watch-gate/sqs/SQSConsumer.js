@@ -1,22 +1,30 @@
 const Consumer = require('sqs-consumer');
+const Producer = require('sqs-producer');
 const AWS = require('aws-sdk');
+const uuidv4 = require('uuid/v4');
+const errors = require('feathers-errors');
 
 class SQSConsumer {
   /**
    * @constructor
    */
-  constructor (options = { awsConfig, queueUrl: '', messageAttributeNames: [], handlers: [] }) {
+  constructor (options = { awsConfig: {}, queueUrl: '', messageAttributeNames: [], handlers: [] }) {
+    /*
+     * Ref. to FeathersJS App
+     */
+    this.app = options.app;
 
     this.handleMessage = this.handleMessage.bind(this);
     this.parseMessageAttributes = this.parseMessageAttributes.bind(this);
     this.getStringAttribute = this.getStringAttribute.bind(this);
     this.invokeHandler = this.invokeHandler.bind(this);
+    this.approveWatchRequest = this.approveWatchRequest.bind(this);
 
     /*
      * If awsConfig is not defined, the machine conf will be used (~/.awd)
      */
     if (typeof options.awsConfig === 'object') {
-        AWS.config.update(options.awsConfig);
+      AWS.config.update(options.awsConfig);
     }
 
     /*
@@ -28,16 +36,30 @@ class SQSConsumer {
       messageAttributeNames: options.messageAttributeNames || [],
       handleMessage: this.handleMessage
     });
+    
+    this.producers = {};
+    this.producers.approve = Producer.create({
+      queueUrl: this.app.get('sqs_queues').approved_watch_requests,
+      region: this.app.get('aws_region')
+    });
+    this.producers.reject = Producer.create({
+      queueUrl: this.app.get('sqs_queues').rejected_watch_requests,
+      region: this.app.get('aws_region')
+    });
+
+    
 
     /*
      * Application logger method
      */
-    this.logger = options.logger || this.log;
+    // this.log = this.log;
 
     /*
      * Error Handling
      */
     this.consumer.on('error', this.errorHandler);
+    // this.errorHandler = this.errorHandler.bind(this);
+    // this.log = this.log.bind(this);
   }
 
   /*
@@ -52,25 +74,66 @@ class SQSConsumer {
    */
   start () {
     this.consumer.start();
-    this.logger.info('SQSConsumer started');
+    this.log('SQSConsumer started');
   }
 
   /*
    * Error Handler
    */
   errorHandler (error) {
-    this.logger.error('SQSConsumer', error)
+    // this.log('SQSConsumer', error)
+  }
+
+  approveWatchRequest (data) {
+    const watchRequest = {
+      id: uuidv4(),
+      body: JSON.stringify(data)
+    };
+    return new Promise ((resolve, reject) => {
+      this.producers.approve.send(watchRequest, error => {
+        if (error) {
+          const err = new errors.GeneralError('watch_request was not added to the queue', { error: error.message });
+          reject(err);
+        } else {
+          console.log("Watch request ququed successfully")
+          resolve();
+        }
+      });
+    });
   }
 
   /*
    * Receive the new messages and removes messages from the queue
    */
   handleMessage (message, done) {
-    console.log("banana", message);
-    const atts = this.parseMessageAttributes(message);
-    this.invokeHandler(message.Body, atts);
-    done();
+    // console.log("banana", message);
+    const payload = JSON.parse(message.Body);
+    // console.log('payload', payload)
+    return new Promise( (resolve, reject) => {
+      const params = {
+        query: Object.assign({}, { user: payload.user }),
+        provider: undefined
+      };
+      this.app.service('streams').find(params).then(result => {
+        // console.log('=====>', result);
+        resolve();
+        if(result.total < 3) {
+          console.log(`watch-request approved, user ${payload.user} is watching ${result.total} streams`);
+          this.approveWatchRequest(message.Body);
+          done()
+        //   // hook.params.availableVideos = result;
+        //   resolve(hook);
+        } else {
+        //   // const data = new errors.NotFound('There is no content available with this filter', { query: params.query});
+        //   reject(data);
+        }
+      });
+    });
+    // const atts = this.parseMessageAttributes(message);
+    // this.invokeHandler(message.Body, atts);
+    // done();
   }
+  
 
   /*
    * Check and parse the message attributes
@@ -108,20 +171,21 @@ class SQSConsumer {
    * Invokes the correct handler for each specific notification
    */
   invokeHandler (body, atts) {
-    const { notificationType } = atts;
-    console.log('notificationType', notificationType);
-    if (typeof this.handlers[notificationType] === 'function') {
-      const handlerFunc = this.handlers[notificationType];
-      handlerFunc()
-      .then( response => {
-        this.logger.info(`SQSConsumer Handler ran successfully (${notificationType})`)
-      })
-      .catch( error => {
-        this.logger.error(`SQSConsumer Handler error occurred (${notificationType})`, error)
-      })
-    } else {
-      this.logger.error(`SQSConsumer Handler not found (${notificationType})`, typeof this.handlers[notificationType])
-    }
+    console.log('Watch Request', body)
+    // const { notificationType } = atts;
+    // console.log('request', notificationType);
+    // if (typeof this.handlers[notificationType] === 'function') {
+    //   const handlerFunc = this.handlers[notificationType];
+    //   handlerFunc()
+    //   .then( response => {
+    //     this.log(`SQSConsumer Handler ran successfully (${notificationType})`)
+    //   })
+    //   .catch( error => {
+    //     this.log(`SQSConsumer Handler error occurred (${notificationType})`, error)
+    //   })
+    // } else {
+    //   this.log(`SQSConsumer Handler not found (${notificationType})`, typeof this.handlers[notificationType])
+    // }
   }
 
 }
