@@ -1,4 +1,15 @@
+const { populate } = require('feathers-hooks-common');
 
+const usersStreamsSchema = {
+  include: {
+    service: 'streams',
+    nameAs: 'streams',
+    parentField: '_id',
+    childField: 'user',
+    useInnerPopulate: true,
+    provider: undefined
+  }
+};
 
 module.exports = {
   before: {
@@ -13,8 +24,12 @@ module.exports = {
 
   after: {
     all: [],
-    find: [],
-    get: [],
+    find: [
+      populate({ schema: usersStreamsSchema })
+    ],
+    get: [
+      populate({ schema: usersStreamsSchema })
+    ],
     create: [],
     update: [],
     patch: [],
