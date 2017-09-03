@@ -96,8 +96,11 @@ $( document ).ready(() => {
     // $('#chat').addClass('connected');
   });
 
-  socket.on('approved_watch_request', (msg) => {
+  socket.on('approved', (msg) => {
     console.log('approved_watch_request', msg);
+  });
+  socket.on('rejected', (msg) => {
+    console.log('rejected_watch_request', msg);
   });
   
 });
