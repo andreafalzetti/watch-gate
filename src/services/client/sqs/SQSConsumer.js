@@ -83,7 +83,7 @@ class SQSConsumer {
   approveWatchRequest (data) {
     const watchRequest = {
       id: uuidv4(),
-      body: JSON.stringify(Object.assign({}, data, { status: 'approved' }))
+      body: JSON.stringify(data)
     };
     return new Promise ((resolve, reject) => {
       this.producers.approve.send(watchRequest, error => {
@@ -101,7 +101,7 @@ class SQSConsumer {
   rejectWatchRequest (data) {
     const watchRequest = {
       id: uuidv4(),
-      body: JSON.stringify(Object.assign({}, data, { status: 'rejected' }))
+      body: JSON.stringify(data)
     };
     return new Promise ((resolve, reject) => {
       this.producers.reject.send(watchRequest, error => {
@@ -132,16 +132,21 @@ class SQSConsumer {
    * Receive the new messages and removes messages from the queue
    */
   async handleMessage (message, done) {    
-    const payload = JSON.parse(message.Body);    
-    const userStreamsCount = await this.countStremsByUserId(payload.user);
-    if(userStreamsCount < 3) {
-      await this.approveWatchRequest(message.Body);
-      await this.saveStream(payload);
-      done();
-    } else {
-      await this.rejectWatchRequest(JSON.parse(message.Body));
-      done();
-    }
+    console.log('handleMessage', message);
+    const payload = JSON.parse(message.Body);
+    const { status } = payload;
+    this.app.io.emit(status, payload);
+    done();
+    // const payload = JSON.parse(message.Body);    
+    // const userStreamsCount = await this.countStremsByUserId(payload.user);
+    // if(userStreamsCount < 3) {
+    //   await this.approveWatchRequest(message.Body);
+    //   await this.saveStream(payload);
+    //   done();
+    // } else {
+    //   await this.rejectWatchRequest(message.Body);
+    //   done();
+    // }
   }
 }
 
