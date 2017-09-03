@@ -1,15 +1,13 @@
 const errors = require('feathers-errors');
 const Producer = require('sqs-producer');
 
-
-
 /**
  * Hook which initialise the AWS Producer. This singleton class allows to push
  * new items to the SQS queue.
  */
 const initProducer = () => hook => {
-  hook.parmas.producer = Producer.create({
-    queueUrl: hook.app.get('sqs_queue_url'),
+  hook.params.producer = Producer.create({
+    queueUrl: hook.app.get('sqs_queues').watch_request,
     region: hook.app.get('aws_region')
   });
   return Promise.resolve(hook);
@@ -54,7 +52,6 @@ module.exports = {
     get: [],
     create: [
       initProducer()
-
     ],
     update: [],
     patch: [],
