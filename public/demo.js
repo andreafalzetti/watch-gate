@@ -89,4 +89,15 @@ $( document ).ready(() => {
       console.log(error);
     }
   })();
+
+  const socket = io.connect(API_URL);
+  socket.on('connect', () => {
+    console.log('connected')
+    // $('#chat').addClass('connected');
+  });
+
+  socket.on('approved_watch_request', (msg) => {
+    console.log('approved_watch_request', msg);
+  });
+  
 });
