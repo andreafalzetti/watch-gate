@@ -6,5 +6,13 @@
     "default": 10,
     "max": 50
   },
-  "mongodb": "mongodb://andrea:kettle-organza-quarrel@ds121494.mlab.com:21494/watch-gate"
+  "mongodb": "",
+  "sqs_queues": {
+    "watch_request": "",
+    "rejected_watch_requests": "",
+    "approved_watch_requests": ""
+  },
+  "aws_region": "",
+  "aws_access_key_id": "",
+  "aws_secret_access_key": ""
 }
