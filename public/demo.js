@@ -1,4 +1,9 @@
-const API_URL = 'http://localhost:3030';
+/**
+ * Backend API URL
+ * param for now.sh (window.location.href)
+ * param for local (http://localhost:3030/)
+ */
+const API_URL = window.location.href;
 let availableVideos;
 
 const clearAlert = (user) => {
@@ -20,7 +25,7 @@ const showAlert = (user) => {
 const refreshUser = async (user) => {
   (async () => {
     try {  
-      let users = await fetch(`${API_URL}/users/${user}`);
+      let users = await fetch(`${API_URL}users/${user}`);
       
       let parsedUsers = await users.json();
       clearAlert(parsedUsers._id)
@@ -33,7 +38,7 @@ const refreshUser = async (user) => {
 
 const stopStream = (user, stream) => {
   console.log('stopStream', user, stream);
-  fetch(`${API_URL}/streams/${stream}`, {
+  fetch(`${API_URL}streams/${stream}`, {
     method: 'delete',
     headers: {
       'Content-Type': 'application/json'
@@ -47,8 +52,7 @@ const stopStream = (user, stream) => {
 
 const requestToWatch = (user) => {
   const video = $(`#videos_${user}`).val();
-  // console.log('requestToWatch ==>', user, video)
-  fetch(`${API_URL}/catalog`, {
+  fetch(`${API_URL}catalog`, {
     method: 'post',
     headers: {
       'Content-Type': 'application/json'
@@ -97,7 +101,7 @@ const updateUserStreams = (user) => {
 };
 
 const renderUsers = (users) => {
-  console.log('renderUsers', typeof users, users)
+  $('#loading').hide();
   users.map((user, index) => {
     
     let { streams = [] } = user;
@@ -142,10 +146,10 @@ const renderUsers = (users) => {
 $( document ).ready(() => {  
   (async () => {
     try {  
-      let users = await fetch(`${API_URL}/users`);
+      let users = await fetch(`${API_URL}users`);
       let parsedUsers = await users.json();
 
-      let videos = await fetch(`${API_URL}/videos`);
+      let videos = await fetch(`${API_URL}videos`);
       let parsedVideos = await videos.json();
   
       console.log('users >>>', parsedUsers.data);
@@ -162,7 +166,6 @@ $( document ).ready(() => {
   const socket = io.connect(API_URL);
   socket.on('connect', () => {
     console.log('connected')
-    // $('#chat').addClass('connected');
   });
 
   socket.on('approved', (msg) => {
