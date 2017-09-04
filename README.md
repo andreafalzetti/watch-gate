@@ -2,8 +2,8 @@
 
 > Node.js microservice for handling the check of how many concurrent streams a given user is watching at the same time
 
-## Demo 
-
+## Demo
+[View the demo](https://watch-gate-yvrjfrzctm.now.sh)
 
 ## Introduction
 This project has been designed and developed using a scalable microservices approach. As the diagram below shows, there are a number of microservices that work together in order to provide the full service to the end user, in particular an on-demand streaming service.
@@ -29,6 +29,8 @@ As illustrated in the diagram above, the microservices are independent applicati
 ## Technology Used
 This project uses [Feathers](http://feathersjs.com). A Node.js open source web framework for building modern real-time applications. It's built on top of [Express.js](https://expressjs.com/), a fast and unopinionated web framework for Node.js.
 
+A document NoSQL database has been used for this project, MongoDB.
+
 The microservice called "client" implements socket.io to allow real-time interactions with the users.
 
 For the queues I have used [AWS SQS](https://aws.amazon.com/sqs/) as it was quick to setup and I have experienced with it.
@@ -42,6 +44,10 @@ All the microservices have been included together in the same application for ti
 https://documenter.getpostman.com/view/75820/watch-gate/6tXb6Ai
 
 ![docs-sample-postman](https://user-images.githubusercontent.com/2318450/29997248-63963506-9006-11e7-9eb0-8b1f388a97a9.jpg)
+
+## Improvements
+* When the client of a specific user disconnects, its active streams should be removed
+* A stream should get removed automatically when it ends (using startTime and duration)
 
 ## Getting Started
 
