@@ -43,7 +43,7 @@
     "feathers-socketio": "^2.0.0",
     "helmet": "^3.8.1",
     "mocha": "^3.5.0",
-    "mongoose": "^4.11.9",
+    "mongoose": "^5.7.5",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "serve-favicon": "^2.4.3",
